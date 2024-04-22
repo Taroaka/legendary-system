@@ -27,10 +27,8 @@ def init_messages():
 
 
 def select_model():
-    model = st.sidebar.radio("Choose a model:", ("GPT-3.5", "GPT-4turbo"))
-    if model == "GPT-3.5":
-        model_name = "gpt-3.5-turbo"
-    else:
+    model = st.sidebar.radio("Choose a model:", ("GPT-4turbo"))
+    if model == ""GPT-4turbo":
         model_name = "gpt-4-turbo"
 
     # スライダーを追加し、temperatureを0から2までの範囲で選択可能にする
