@@ -11,10 +11,10 @@ from langchain.callbacks import get_openai_callback
 def init_page():
     st.set_page_config(
         page_title="My Great ChatGPT",
-        page_icon="🤗"
+        page_icon="🤓"
     )
-    st.header("My Great ChatGPT 🤗")
-    st.sidebar.title("Options")
+    st.header("ChatGPT 🤓")
+    st.sidebar.title("オプション")
 
 
 def init_messages():
@@ -27,7 +27,7 @@ def init_messages():
 
 
 def select_model():
-    model = st.sidebar.radio("Choose a model:", ("GPT-3.5", "GPT-4"))
+    model = st.sidebar.radio("Choose a model:", ("GPT-3.5", "GPT-4(new)"))
     if model == "GPT-3.5":
         model_name = "gpt-3.5-turbo"
     else:
