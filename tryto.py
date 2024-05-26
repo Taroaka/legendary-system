@@ -376,7 +376,9 @@ def generate_final_script3(info3, model_name, theme, final_script1, final_script
 
 def main():
     init_page()
-    
+    # モデルを選択
+    model_name = select_model()
+
     # APIキーを取得
     api_key = get_api_key("OpenAI APIキーを入力してください:", "api_key")
     
@@ -388,8 +390,6 @@ def main():
         # OpenAIクライアントを初期化
         client = OpenAI(api_key=api_key)
         
-        # モデルを選択
-        model_name = select_model()
         
         # テーマを取得
         theme = st.text_input("テーマを入力してください:", key="theme")
