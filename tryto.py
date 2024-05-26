@@ -3,21 +3,14 @@ import streamlit as st
 from openai import OpenAI
 from pytube import YouTube
 
-
-
 def init_page():
     st.set_page_config(page_title="Youtube Summarizer", page_icon="📝")
     st.header("Youtubeから全自動台本制作システム📝")
     st.sidebar.title("モデルオプション")
 
 def select_model():
-    model = st.sidebar.radio("モデルを選択:", ("gpt-4o","gpt-3.5-turbo"))
+    model = st.sidebar.radio("モデルを選択:", ("gpt-4o", "gpt-3.5-turbo"))
     return model
-
-def get_api_key(label, key):
-    api_key = st.text_input(label, type="password", key=key)
-    return api_key
-
 
 def get_youtube_url(label, key):
     video_url = st.text_input(label, key=key)
@@ -34,13 +27,11 @@ def download_transcribe_and_extract(video_url, model_name, theme, client):
             file=audio_file,
             model="whisper-1",
             language="ja",
-            response_format='text',  # テキスト形式で取得
-            )
+            response_format='text',
+        )
 
-    # 2. 取得したテキストデータをそのまま使用
     transcript_text = transcript_response
 
-    # 3. 抽出APIにテキスト形式のデータを渡す
     prompt = (
         f"###テキストデータから、提供するテキストから情報を余すことなく抽出するために、下記をstep-by-stepで実行してください。\n"
         f"\n"
@@ -200,7 +191,6 @@ def generate_final_script1(info1, model_name, theme, client):
         f"以下の内容を元に、ナレーターとずんだもんの会話形式で{theme}に関する動画原稿の一部を作成してください。\n"
         f"スクリプト内の情報を、ナレーターが全て解説してください。\n"
         f"ずんだもんは解説を受けて、リアクションや疑問点をナレーターに返してください。動画の原稿としてスムーズに話が繋がるようにしてください。\n"
-        f" また、スクリプト内で{theme}に関して初学者向けの基礎的な知識が不足している場合、冒頭の挨拶以降に、自然な感じで説明してください。"
         f"\n"
         f"###スクリプト\n"
         f"{info1}\n"
@@ -224,7 +214,7 @@ def generate_final_script1(info1, model_name, theme, client):
     final_script1 = response.choices[0].message.content
     return final_script1
 
-def generate_final_script2(info2, model_name, theme, final_script1,client):
+def generate_final_script2(info2, model_name, theme, final_script1, client):
     system_prompt = (
         f"### Context ###\n"
         f"ユーザーが入力したスクリプトから、{theme}に関するYouTube動画を作成する原稿の一部を作成してください。\n"
@@ -373,56 +363,44 @@ def generate_final_script3(info3, model_name, theme, final_script1, final_script
     return final_script3
 
 
-
 def main():
     init_page()
-    
-
-    # モデルを選択
     model_name = select_model()
-    
-    # APIキーを取得
-    api_key = get_api_key("OpenAI APIキーを入力してください:", "api_key")
-    
-    # YouTubeのURLを取得
-    video_url1 = get_youtube_url("動画URL1:", "video_url1")
-    video_url2 = get_youtube_url("動画URL2:", "video_url2")
-    
-    if api_key:
-        # OpenAIクライアントを初期化
+
+    st.subheader("APIキーを入力してください。")
+    api_key = st.text_input("OpenAI APIキー:", type="password")
+
+    st.subheader("動画URLを入力してください。")
+    video_url1 = get_youtube_url("動画1のURL:", "url1")
+    video_url2 = get_youtube_url("動画2のURL:", "url2")
+
+    theme = st.text_input("テーマを入力してください。(1単語)")
+
+    if st.button("台本生成") and api_key:
         client = OpenAI(api_key=api_key)
         
-        
-        # テーマを取得
-        theme = st.text_input("テーマを入力してください:", key="theme")
-     
-    
-        if st.button("動画台本生成"):
-        # 各動画からテキストを取得し、要素を生成
-            info1 = download_transcribe_and_extract(video_url1, client, model_name, theme)
-            info2 = download_transcribe_and_extract(video_url2, client, model_name, theme)
-        
-        # 要素を結合してスクリプト生成
-            combined_elements = combine_elements(info1, info2, client, model_name)
-        
-            if 'final_script1' not in st.session_state:
-                st.session_state['final_script1'] = generate_final_script1(combined_elements[0], client, model_name, theme)
-                st.session_state['final_script2'] = generate_final_script2(combined_elements[1], client, model_name, theme, st.session_state['final_script1'])
-                st.session_state['final_script3'] = generate_final_script3(combined_elements[2], client, model_name, theme, st.session_state['final_script1'], st.session_state['final_script2'])
+        st.subheader("情報抽出中...")
+        info1 = download_transcribe_and_extract(video_url1, model_name, theme, client)
+        info2 = download_transcribe_and_extract(video_url2, model_name, theme, client)
 
-                st.session_state['combined_script'] = st.session_state['final_script1'] + "\n\n" + st.session_state['final_script2'] + "\n\n" + st.session_state['final_script3']
-        
-        # combined_script を表示
-            st.subheader("結合されたスクリプト")
-            st.text_area("combined_script:", value=st.session_state['combined_script'], height=400)
+        combined_elements = combine_elements(info1, info2, model_name, client)
 
-        # ダウンロードボタンを追加
-            st.download_button(
-                label="結合されたスクリプトをダウンロード",
-                data=st.session_state['combined_script'],
-                file_name="combined_script.txt",
-                mime="text/plain"
-            )
+        if 'final_script1' not in st.session_state:
+            st.session_state['final_script1'] = generate_final_script1(combined_elements[0], model_name, theme, client)
+            st.session_state['final_script2'] = generate_final_script2(combined_elements[1], model_name, theme, st.session_state['final_script1'], client)
+            st.session_state['final_script3'] = generate_final_script3(combined_elements[2], model_name, theme, st.session_state['final_script1'], st.session_state['final_script2'], client)
+
+            st.session_state['combined_script'] = st.session_state['final_script1'] + "\n\n" + st.session_state['final_script2'] + "\n\n" + st.session_state['final_script3']
+
+        st.subheader("最終スクリプト")
+        st.text_area("最終スクリプト:", value=st.session_state['combined_script'], height=400)
+
+        st.download_button(
+            label="台本をダウンロード",
+            data=st.session_state['combined_script'],
+            file_name="combined_script.txt",
+            mime="text/plain"
+        )
 
 if __name__ == "__main__":
     main()
