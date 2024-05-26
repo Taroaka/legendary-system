@@ -1,11 +1,9 @@
 import re
 import streamlit as st
-import openai
+from openai import OpenAI
 from pytube import YouTube
 
-# OpenAIクライアントを初期化
-client = OpenAI(api_key="sk-proj-TyqqkI5ghoiez5Cj52DhT3BlbkFJ43o2oeJinKwjyUJjEsb2")
-api_key = st.text_input("OpenAI APIキーを入力してください:", type="password")
+
 
 def init_page():
     st.set_page_config(page_title="Youtube Summarizer", page_icon="📝")
@@ -376,7 +374,6 @@ def generate_final_script3(info3, model_name, theme, final_script1, final_script
 
 
 
-
 def main():
     init_page()
     
@@ -396,29 +393,30 @@ def main():
         
         # テーマを取得
         theme = st.text_input("テーマを入力してください:", key="theme")
-        
+     
+    
         if st.button("動画台本生成"):
-            # 各動画からテキストを取得し、要素を生成
+        # 各動画からテキストを取得し、要素を生成
             info1 = download_transcribe_and_extract(video_url1, client, model_name, theme)
             info2 = download_transcribe_and_extract(video_url2, client, model_name, theme)
-            
-            # 要素を結合してスクリプト生成
+        
+        # 要素を結合してスクリプト生成
             combined_elements = combine_elements(info1, info2, client, model_name)
-            
+        
             if 'final_script1' not in st.session_state:
                 st.session_state['final_script1'] = generate_final_script1(combined_elements[0], client, model_name, theme)
                 st.session_state['final_script2'] = generate_final_script2(combined_elements[1], client, model_name, theme, st.session_state['final_script1'])
                 st.session_state['final_script3'] = generate_final_script3(combined_elements[2], client, model_name, theme, st.session_state['final_script1'], st.session_state['final_script2'])
 
                 st.session_state['combined_script'] = st.session_state['final_script1'] + "\n\n" + st.session_state['final_script2'] + "\n\n" + st.session_state['final_script3']
-            
-            # combined_script を表示
-            st.subheader("台本が完成しました！！")
+        
+        # combined_script を表示
+            st.subheader("結合されたスクリプト")
             st.text_area("combined_script:", value=st.session_state['combined_script'], height=400)
 
-            # ダウンロードボタンを追加
+        # ダウンロードボタンを追加
             st.download_button(
-                label="台本をダウンロード",
+                label="結合されたスクリプトをダウンロード",
                 data=st.session_state['combined_script'],
                 file_name="combined_script.txt",
                 mime="text/plain"
@@ -426,5 +424,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
