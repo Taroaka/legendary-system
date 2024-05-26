@@ -23,7 +23,7 @@ def get_youtube_url(label, key):
     video_url = st.text_input(label, key=key)
     return video_url
 
-def download_transcribe_and_extract(video_url, model_name, theme):
+def download_transcribe_and_extract(video_url, model_name, theme, client):
     # 1. Whisperで動画を文字起こしし、テキスト形式で取得
     youtube_video = YouTube(video_url)
     audio_stream = youtube_video.streams.filter(only_audio=True).first()
@@ -106,7 +106,7 @@ def download_transcribe_and_extract(video_url, model_name, theme):
     
     return elements
 
-def combine_elements(element1, element2, model_name):
+def combine_elements(element1, element2, model_name, client):
     prompt = (
         f"以下の2つの情報を基に、ステップバイステップで3つのカテゴリに分けて情報を整理してください:\n"
         f"Step1.情報1と2から被っている情報を詳述\n"
@@ -156,7 +156,7 @@ def combine_elements(element1, element2, model_name):
     
     return info1, info2, info3
 
-def generate_final_script1(info1, model_name, theme):
+def generate_final_script1(info1, model_name, theme, client):
     system_prompt = (
         f"### Context ###\n"
         f"ユーザーが入力したスクリプトから、{theme}に関するYouTube動画を作成する原稿の一部を作成してください。\n"
@@ -224,7 +224,7 @@ def generate_final_script1(info1, model_name, theme):
     final_script1 = response.choices[0].message.content
     return final_script1
 
-def generate_final_script2(info2, model_name, theme, final_script1):
+def generate_final_script2(info2, model_name, theme, final_script1,client):
     system_prompt = (
         f"### Context ###\n"
         f"ユーザーが入力したスクリプトから、{theme}に関するYouTube動画を作成する原稿の一部を作成してください。\n"
@@ -295,7 +295,7 @@ def generate_final_script2(info2, model_name, theme, final_script1):
     final_script2 = response.choices[0].message.content
     return final_script2
 
-def generate_final_script3(info3, model_name, theme, final_script1, final_script2):
+def generate_final_script3(info3, model_name, theme, final_script1, final_script2, client):
     system_prompt = (
         f"### Context ###\n"
         f"ユーザーが入力したスクリプトから、{theme}に関するYouTube動画を作成する原稿の一部を作成してください。\n"
@@ -376,9 +376,11 @@ def generate_final_script3(info3, model_name, theme, final_script1, final_script
 
 def main():
     init_page()
+    
+
     # モデルを選択
     model_name = select_model()
-
+    
     # APIキーを取得
     api_key = get_api_key("OpenAI APIキーを入力してください:", "api_key")
     
