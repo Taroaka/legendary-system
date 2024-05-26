@@ -1,6 +1,6 @@
 import re
 import streamlit as st
-from openai import OpenAI
+import openai
 from pytube import YouTube
 
 # OpenAIクライアントを初期化
