@@ -367,7 +367,7 @@ def main():
     init_page()
     model_name = select_model()
 
-    st.subheader("APIキーを入力してください。")
+    st.subheader("Open AI APIキーを入力してください。")
     api_key = st.text_input("OpenAI APIキー:", type="password")
 
     st.subheader("動画URLを入力してください。")
@@ -379,7 +379,7 @@ def main():
     if st.button("台本生成") and api_key:
         client = OpenAI(api_key=api_key)
         
-        st.subheader("情報抽出中...")
+        st.subheader("台本を作成中...")
         info1 = download_transcribe_and_extract(video_url1, model_name, theme, client)
         info2 = download_transcribe_and_extract(video_url2, model_name, theme, client)
 
@@ -392,8 +392,8 @@ def main():
 
             st.session_state['combined_script'] = st.session_state['final_script1'] + "\n\n" + st.session_state['final_script2'] + "\n\n" + st.session_state['final_script3']
 
-        st.subheader("最終スクリプト")
-        st.text_area("最終スクリプト:", value=st.session_state['combined_script'], height=400)
+        st.subheader("台本完成!!")
+        st.text_area("台本:", value=st.session_state['combined_script'], height=400)
 
         st.download_button(
             label="台本をダウンロード",
