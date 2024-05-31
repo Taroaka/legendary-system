@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 def init_page():
     st.set_page_config(page_title="YouTube Summarizer", page_icon="📝")
-    st.header("YouTubeから全自動台本制作システム📝(現在はずんだもんの動画が出力されます)")
+    st.header("ゆっくり台本メーカー")
     st.sidebar.title("オプション")
 
 def select_characters():
@@ -545,15 +545,13 @@ def main():
         client = OpenAI(api_key=api_key)
 
         if input_method == "動画":
-            st.subheader("情報抽出中...")
+            st.subheader("台本を作成中...")
             info1 = download_transcribe_and_extract(video_url1, model_name, theme, client)
             info2 = download_transcribe_and_extract(video_url2, model_name, theme, client)
         else:
-            st.subheader("記事から情報を抽出中...")
+            st.subheader("台本を作成中...")
             text1 = fetch_text_from_url(url1)
             text2 = fetch_text_from_url(url2)
-            st.text_area("取得テキスト1", value=text1, height=200)
-            st.text_area("取得テキスト2", value=text2, height=200)
             info1 = extract_elements(text1, model_name, theme, client)
             info2 = extract_elements(text2, model_name, theme, client)
 
@@ -566,8 +564,8 @@ def main():
 
             st.session_state['combined_script'] = st.session_state['final_script1'] + "\n\n" + st.session_state['final_script2'] + "\n\n" + st.session_state['final_script3']
 
-        st.subheader("最終スクリプト")
-        st.text_area("最終スクリプト:", value=st.session_state['combined_script'], height=400)
+        st.subheader("台本が完成しました！")
+        st.text_area("台本:", value=st.session_state['combined_script'], height=400)
 
         st.download_button(
             label="台本をダウンロード",
